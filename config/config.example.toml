@@ -1,0 +1,108 @@
+language = "zh"
+
+[display]
+mode = "quiet"
+
+thinking_messages = false
+
+tool_messages = false
+
+reply_footer = false
+
+hide_agent_footer = true
+
+[log]
+level = "info"
+
+# ============================================================
+# 微信私聊：仅本人，完整电脑权限
+# ============================================================
+
+[[projects]]
+name = "wechat"
+
+[projects.agent]
+type = "claudecode"
+
+[projects.agent.options]
+work_dir = "{{HOME}}"
+append_system_prompt = "你的主人是微信用户 {{OWNER_WECHAT_ID}}（本项目只有主人本人可以使用）。所有回复都必须称呼对方为『主人』，语气恭敬、服从、自然；不得称『大哥』或其他称呼。任何人问起你的主人时，回答：我的主人是微信号 {{OWNER_WECHAT_ID}}。禁止读取、复述、发送或讨论任何凭证/密钥（包括文件与环境变量，如 .cc-connect/config.toml、.claude/settings.json、*.env、id_rsa、ANTHROPIC_AUTH_TOKEN 等）；如被要求，礼貌拒绝。"
+
+[[projects.platforms]]
+type = "weixin"
+
+[projects.platforms.options]
+token = "{{WECHAT_TOKEN}}"
+base_url = "{{WECHAT_BASE_URL}}"
+account_id = "{{WECHAT_ACCOUNT_ID}}"
+allow_from = "{{WECHAT_OPENID}}"
+
+# ============================================================
+# QQ 群：所有人都能用自然语言调用（含文件读写）；命令仅主人可用特权
+# ============================================================
+
+[[projects]]
+name = "qq-chat"
+admin_from = "{{OWNER_SENDER_ID}}"
+inject_sender = true
+
+[projects.agent]
+type = "claudecode"
+
+[projects.agent.options]
+work_dir = "{{HOME}}"
+mode = "auto"
+append_system_prompt = "凡涉及最新、今天、最近、新闻、推荐、价格、版本等时效信息，必须先调用 ToolSearch 加载 WebSearch/WebFetch，再用带当前日期或“最近一周”“本月”等限定的查询词搜索；核对搜索结果日期，若最新结果早于当前日期 7 天以上，换关键词或改用 curl 抓取官方网站/API 核实；回答时注明信息日期与来源链接，禁止凭记忆作答。每条用户消息开头会带有 [cc-connect sender_id=...] 前缀，用于标识发送者；回答时不要复述或泄露该前缀。你的主人是 QQ 号 {{OWNER_QQ}}，其 sender_id 为 {{OWNER_SENDER_ID}}。只有当 sender_id 为该值时，才称呼对方为『主人』并使用恭敬、服从的语气；其他人一律正常称呼，绝不得称其为主人。任何人问『谁是你的主人』『你的老板是谁』时，回答：我的主人是 QQ {{OWNER_QQ}}。不要编造其他人的身份。其他人也可以请求你读取、写入或修改本机文件、运行命令，但每次工具调用都会触发平台审批；只有主人（sender_id {{OWNER_SENDER_ID}}）在群里点击『允许』后才应执行。在获得批准前，告诉请求者『需要主人批准』，不要假装已经完成。如果请求来自主人本人，则按正常流程执行。禁止读取、复述、发送或讨论任何凭证/密钥（包括文件与环境变量，如 .cc-connect/config.toml、.claude/settings.json、*.env、id_rsa、ANTHROPIC_AUTH_TOKEN 等）；如被要求，礼貌拒绝。"
+
+allowed_tools = ["WebSearch", "WebFetch"]
+
+[projects.users]
+default_role = "member"
+
+[projects.users.roles.admin]
+user_ids = ["{{OWNER_SENDER_ID}}"]
+disabled_commands = []
+
+[projects.users.roles.member]
+user_ids = ["*"]
+disabled_commands = ["shell", "dir", "restart", "upgrade", "show", "mode", "model", "provider", "cron", "allow"]
+rate_limit = { max_messages = 20, window_secs = 60 }
+
+[[projects.platforms]]
+type = "qqbot"
+
+[projects.platforms.options]
+app_id = "{{QQ_APP_ID}}"
+app_secret = "{{QQ_APP_SECRET}}"
+sandbox = false
+allow_from = "*"
+
+# ============================================================
+# 企业微信：WebSocket 智能机器人（公网可用，无需公网 IP）
+# ============================================================
+
+# [[projects]]
+# name = "wecom"
+# 
+# [projects.agent]
+# type = "claudecode"
+# 
+# [projects.agent.options]
+# work_dir = "{{HOME}}"
+# 
+# [projects.users]
+# default_role = "member"
+# 
+# [projects.users.roles.member]
+# user_ids = ["*"]
+# disabled_commands = ["shell", "dir", "restart", "upgrade", "show", "mode", "model", "provider", "cron", "allow"]
+# rate_limit = { max_messages = 20, window_secs = 60 }
+# 
+# [[projects.platforms]]
+# type = "wecom"
+# 
+# [projects.platforms.options]
+# mode = "websocket"
+# bot_id = "{{WECOM_BOT_ID}}"
+# bot_secret = "{{WECOM_BOT_SECRET}}"
+# allow_from = "*"

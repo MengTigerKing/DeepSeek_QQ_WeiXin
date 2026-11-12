@@ -1,0 +1,18 @@
+# --- secrets: never commit these ---
+config/config.toml
+config/claude-private.env
+config/*.env
+*.key
+
+# --- backups / logs ---
+*.bak
+*.bak-*
+*.log
+backups/
+*.zip
+
+# --- local scratch ---
+_deploy-stage/
+Thumbs.db
+desktop.ini
+.DS_Store
