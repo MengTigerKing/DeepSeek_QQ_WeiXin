@@ -1,0 +1,2 @@
+# DeepSeek_QQ_WeiXin
+claude接入deepseekapi配置qq和微信聊天机器人
